@@ -2,7 +2,7 @@ from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 
-import config
+from . import config
 
 def load_database():
   """

@@ -1,39 +1,38 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from inspection import load_database, get_vision_observation, search_laws, run_judge
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-db=load_database()
+from health_inspector.inspection import load_database, get_vision_observation, search_laws, run_judge
 
-print("-"*50)
+def main():
+    db=load_database()
 
-vision_observation=get_vision_observation()
+    print("-"*50)
 
-print("-"*50)
+    vision_observation=get_vision_observation()
 
-matched_laws=search_laws(db, vision_observation)
+    print("-"*50)
 
-print("-"*50)
+    matched_laws=search_laws(db, vision_observation)
 
-if not matched_laws:
-    print("❌ No results found for the vision observation.")
-    exit(1)
-else:
-    verdict = run_judge(vision_observation, matched_laws)
+    print("-"*50)
 
-    print("=" * 50)
-    print("INSPECTION REPORT:")
-    print(verdict)
-    print("=" * 50)
+    if not matched_laws:
+        print("❌ No results found for the vision observation.")
+        exit(1)
+    else:
+        verdict = run_judge(vision_observation, matched_laws)
 
-###########
-# import os
-
-
-# def main():
-#     print("Hello from health-inspector!")
-#     print(os.getenv('OPENAI_API_KEY'))
+        print("=" * 50)
+        print("INSPECTION REPORT:")
+        print(verdict)
+        print("=" * 50)
 
 
-# if __name__ == "__main__":
-#     main()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,7 +1,11 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from ingestion import split_documents, load_pdfs, save_documents_to_db
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+
+from health_inspector.ingestion import load_pdfs, split_documents, save_documents_to_db
 
 pdf_files = [
     "./resources/gida_hijyeni_yonetmeligi.pdf",
@@ -9,8 +13,12 @@ pdf_files = [
     # "./resources/isyeri_acma_ve_calisma_ruhsatlarina_iliskin_yonetmelik.pdf",
 ]
 
-all_documents=load_pdfs(pdf_files)
+def ingest():
+    all_documents=load_pdfs(pdf_files)
 
-documents=split_documents(all_documents)
+    documents=split_documents(all_documents)
 
-save_documents_to_db(documents)
+    save_documents_to_db(documents)
+
+if __name__ == "__main__":
+    ingest()
