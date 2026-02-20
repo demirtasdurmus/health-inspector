@@ -35,7 +35,6 @@ def load_pdfs(pdf_files):
     print(f"Loaded {len(all_documents)} pages total.")
     return all_documents
 
-
 def split_documents(documents):
     """
     Split documents into chunks for embedding.

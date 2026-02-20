@@ -1,61 +1,30 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_chroma import Chroma
-from langchain_core.prompts import ChatPromptTemplate
+from inspection import load_database, get_vision_observation, search_laws, run_judge
 
-import config
+db=load_database()
 
-# 1. Load the pre-built db
-embeddings=OpenAIEmbeddings(model=config.EMBEDDING_MODEL)
-db=Chroma(persist_directory=config.DB_PATH,embedding_function=embeddings)
-
-print("✅ Database loaded from disk!")
-
-# 2. Vision Observation
-vision_observation="Mutfak tezgahının üzerinde ahşap bir kesme tahtası duruyor."
-
-print(f"✅ Vision Observation: '{vision_observation}'")
 print("-"*50)
 
-# 3. RAG Search(k=3 for more context)
-results=db.similarity_search(vision_observation, k=config.DEFAULT_TOP_K)
+vision_observation=get_vision_observation()
 
-if not results:
+print("-"*50)
+
+matched_laws=search_laws(db, vision_observation)
+
+print("-"*50)
+
+if not matched_laws:
     print("❌ No results found for the vision observation.")
     exit(1)
 else:
-    for i, doc in enumerate(results, 1):
-        print(f"Match {i}: {doc.page_content[:100]}...")
-        print(f"Source: {doc.metadata.get('resource', 'unknown')}\n")
-
-# 4. Judge AI Decision
-    judge_llm=ChatOpenAI(temperature=config.LLM_TEMPERATURE, model=config.LLM_MODEL)
-    laws_context="\n\n".join([doc.page_content for doc in results])
-
-    prompt_template=ChatPromptTemplate.from_template("""
-    Sen Türk Gıda Mevzuatı denetçisisin. Aşağıdaki kanıtı ve ilgili yasaları incele.
-    
-    KANIT (Gözlem): {observation}
-    
-    İLGİLİ YASALAR:
-    {laws}
-    
-    GÖREV:
-    Bu durum bir ihlal midir? Neden? Hangi mevzuata göre?
-    Cevabı JSON formatında ver: {{"violation": true/false, "explanation": "...", "risk_level": "...", "mevzuat": "..."}}
-    """)
-
-    chain = prompt_template | judge_llm
-    verdict = chain.invoke({
-        "observation": vision_observation,
-        "laws": laws_context
-    })
+    verdict = run_judge(vision_observation, matched_laws)
 
     print("=" * 50)
     print("INSPECTION REPORT:")
-    print(verdict.content)
+    print(verdict)
+    print("=" * 50)
 
 ###########
 # import os
