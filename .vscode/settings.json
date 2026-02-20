@@ -16,6 +16,7 @@
     "pycache",
     "pypdf",
     "ruhsatlarina",
+    "uvicorn",
     "venv"
   ]
 }
