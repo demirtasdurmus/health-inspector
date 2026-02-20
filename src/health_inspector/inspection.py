@@ -1,6 +1,13 @@
+import base64
+import io
+from pathlib import Path
+
+import pillow_heif
+from PIL import Image
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import HumanMessage
 
 from . import config
 
@@ -20,20 +27,63 @@ def load_database():
   print("✅ Database loaded from disk!")
   return db
 
-def get_vision_observation():
+DEFAULT_IMAGE_PATHS = [
+    "resources/images/IMG_4047.HEIC",
+    "resources/images/IMG_4048.HEIC",
+    "resources/images/IMG_4049.HEIC",
+]
+
+VISION_PROMPT = """Sen bir gıda denetimi tutanağı yazan denetçisisin. Sana verilen görüntüleri incele ve gördüklerini nesnel biçimde kaydet.
+
+GÖREV:
+- Görüntülerde ne gördüğünü gıda güvenliği ve hijyen açısından önemli olacak şekilde tarafsız ve olgusal olarak açıkla: tezgahlar, ekipmanlar (kesme tahtası, bıçak, ocak vb.), yüzeyler, malzemeler (ahşap, plastik, cam vb.), nesneler ve genel düzen.
+- Yorum yapma, değerlendirme yapma, öneri verme veya iyi/kötü gibi nitelendirmeler kullanma.
+- Sadece gözle görüleni yaz; çıkarım veya varsayım ekleme.
+- Cevabını Türkçe, düz metin (tek paragraf) olarak ver."""
+
+def _load_image_as_base64(image_path: str) -> str:
+  """Loads a HEIC or standard image and returns a base64-encoded JPEG string."""
+  path = Path(image_path)
+  if path.suffix.upper() == ".HEIC":
+    heif_file = pillow_heif.read_heif(str(path))
+    image = Image.frombytes(heif_file.mode, heif_file.size, heif_file.data, "raw")
+  else:
+    image = Image.open(path)
+
+  buffer = io.BytesIO()
+  image.convert("RGB").save(buffer, format="JPEG")
+  return base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+def get_vision_observation(image_paths: list[str] = None) -> str:
   """
-  Gets vision observation from the provided photos&videos
-  For now returns static text for simplicity
+  Sends images to a vision-capable LLM and returns an inspection-context description.
 
   Args:
-    A list of images or a video(s)
+    image_paths: List of paths to image files (HEIC or standard formats).
+                 Defaults to the three sample images in resources/images/.
 
   Returns:
-    Vision observation generated from images/video(s) by AI model
+    Vision observation text describing the scene from a food safety perspective.
   """
-  vision_observation="Mutfak tezgahının üzerinde ahşap bir kesme tahtası duruyor."
+  if image_paths is None:
+    image_paths = DEFAULT_IMAGE_PATHS
 
-  print(f"✅ Vision Observation: '{vision_observation}'")
+  image_contents = []
+  for path in image_paths:
+    b64 = _load_image_as_base64(path)
+    image_contents.append({
+        "type": "image_url",
+        "image_url": {"url": f"data:image/jpeg;base64,{b64}"},
+    })
+
+  image_contents.append({"type": "text", "text": VISION_PROMPT})
+
+  vision_llm = ChatOpenAI(model=config.VISION_MODEL, temperature=config.LLM_TEMPERATURE)
+  message = HumanMessage(content=image_contents)
+  response = vision_llm.invoke([message])
+
+  vision_observation = response.content
+  print(f"✅ Vision observation received:\n {vision_observation})")
 
   return vision_observation
 

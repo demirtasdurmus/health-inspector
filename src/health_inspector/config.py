@@ -6,6 +6,7 @@ This makes it easy to change values without searching through multiple files.
 # OpenAI Configuration
 EMBEDDING_MODEL="text-embedding-3-small"
 LLM_MODEL="gpt-4o"
+VISION_MODEL="gpt-4o"
 LLM_TEMPERATURE=0
 
 # Database Configuration
