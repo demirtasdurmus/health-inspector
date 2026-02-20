@@ -2,6 +2,9 @@
 Ingestion module - functions for loading and processing documents.
 """
 
+import os
+import shutil
+
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
@@ -56,6 +59,7 @@ def split_documents(documents):
 def save_documents_to_db(documents):
     """
     Create embeddings and save documents to the vector database.
+    Clears any existing DB first to prevent duplicate chunks on re-runs.
 
     Args:
         documents: List of chunked documents to save
@@ -63,6 +67,9 @@ def save_documents_to_db(documents):
     Returns:
         The Chroma database object (in case you need it later)
     """
+    if os.path.exists(config.DB_PATH):
+        shutil.rmtree(config.DB_PATH)
+        print(f"🗑️  Cleared existing DB at {config.DB_PATH}")
 
     embeddings = OpenAIEmbeddings(model=config.EMBEDDING_MODEL)
     db = Chroma.from_documents(
