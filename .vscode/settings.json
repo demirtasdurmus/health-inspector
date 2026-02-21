@@ -18,5 +18,6 @@
     "ruhsatlarina",
     "uvicorn",
     "venv"
-  ]
+  ],
+  "python.terminal.useEnvFile": true
 }
