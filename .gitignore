@@ -14,3 +14,5 @@ wheels/
 
 # Chroma
 chroma_db
+
+.DS_Store
