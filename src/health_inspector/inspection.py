@@ -28,9 +28,9 @@ def load_database():
   return db
 
 DEFAULT_IMAGE_PATHS = [
-    "resources/images/IMG_4047.HEIC",
-    "resources/images/IMG_4048.HEIC",
-    "resources/images/IMG_4049.HEIC",
+    "resources/images/IMG_4047.jpg",
+    "resources/images/IMG_4048.jpg",
+    "resources/images/IMG_4049.jpg",
 ]
 
 VISION_PROMPT = """Sen bir gıda denetimi tutanağı yazan denetçisisin. Sana verilen görüntüleri incele ve gördüklerini nesnel biçimde kaydet.

@@ -108,7 +108,7 @@ flowchart TD
 
 ### Step 1 — Vision Observation
 
-- Each uploaded image (HEIC, JPEG, PNG, …) is decoded by `pillow-heif` / Pillow and converted to base64 JPEG.
+- Each uploaded image (JPEG, PNG, …) is decoded by `pillow-heif` / Pillow and converted to base64 JPEG.
 - All images are sent together in a single call to `gpt-4o` with a carefully worded prompt.
 - The prompt instructs the model to act as an **inspector filling a record** — it describes only what is visually present (surfaces, equipment, materials, layout) without making judgments or recommendations.
 - Output: a plain Turkish paragraph that other steps can reason about.
@@ -178,10 +178,10 @@ health-inspector/
 ├── resources/
 │   ├── gida_hijyeni_yonetmeligi.pdf
 │   ├── toplu_tuketim_yerleri_hijyen_uygulama_kilavuzu.pdf
-│   └── images/                        # Sample HEIC photos for local testing
-│       ├── IMG_4047.HEIC
-│       ├── IMG_4048.HEIC
-│       └── IMG_4049.HEIC
+│   └── images/                        # Sample jpg photos for local testing
+│       ├── IMG_4047.jpg
+│       ├── IMG_4048.jpg
+│       └── IMG_4049.jpg
 │
 ├── chroma_db/                         # Persisted vector database (git-ignored)
 ├── docs/
@@ -231,7 +231,7 @@ uv run ingest.py
 
 ```bash
 uv run main.py
-# Uses the sample HEIC images in resources/images/
+# Uses the sample jpg images in resources/images/
 # Prints observation, matched laws, and verdict to the terminal
 ```
 
@@ -245,8 +245,8 @@ Send images from any client:
 
 ```bash
 curl -X POST http://localhost:8000/inspect \
-  -F "images=@photo1.heic" \
-  -F "images=@photo2.heic"
+  -F "images=@photo1.jpg" \
+  -F "images=@photo2.jpg"
 ```
 
 Interactive API docs are available at `http://localhost:8000/docs`.

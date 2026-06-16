@@ -66,7 +66,7 @@ def _run_pipeline(image_paths: list[str]) -> dict:
 @app.post("/inspect")
 async def inspect(images: list[UploadFile] = File(...)):
     """
-    Accept one or more image files (HEIC, JPEG, PNG, etc.) as multipart/form-data.
+    Accept one or more image files (JPEG, PNG, etc.) as multipart/form-data.
     Returns a structured JSON inspection report.
     """
     import asyncio
